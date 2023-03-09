@@ -26,4 +26,4 @@ def non_max_suppression(pred: list, prob_threshold: float, iou_threshold: float,
         boxes_dict[box[0]].append(box)
     for class_num, class_boxes in boxes_dict.items():
         boxes_dict[class_num] = non_max_suppresion_for_one_class(class_boxes, prob_threshold, iou_threshold, format)
-    return flatten(boxes_dict)
+    return flatten(boxes_dict.values())
