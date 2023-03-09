@@ -19,7 +19,6 @@ def iou(pred, true, format: str = 'pascal_voc'):
     if format == 'midpoint':
         pred = midpoint_to_pascal_voc(pred)
         true = midpoint_to_pascal_voc(true)
-
         format = 'pascal_voc'
 
     x_min = torch.maximum(pred[:, 0:1], true[:, 0:1])
