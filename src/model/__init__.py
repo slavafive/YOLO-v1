@@ -1,0 +1,1 @@
+from yolo.src.model.model import YOLO
