@@ -5,8 +5,7 @@ from yolo.src.metrics import iou
 
 class YOLOLoss(nn.Module):
 
-    def __init__(self, S: int = 7, B: int = 2, C: int = 20, lambda_coord: float = 5, lambda_noobj: float = 0.5,
-                 eps: float = 1e-6):
+    def __init__(self, S: int = 7, B: int = 2, C: int = 20, lambda_coord: float = 5, lambda_noobj: float = 0.5, eps: float = 1e-6):
         super(YOLOLoss, self).__init__()
         self.mse = nn.MSELoss(reduction='sum')
         self.S = S
@@ -31,15 +30,36 @@ class YOLOLoss(nn.Module):
         ious = torch.concat([iou_1.unsqueeze(-1), iou_2.unsqueeze(-1)], dim=-1)
         _, indices = torch.max(ious, -1)
 
-        exists_box = true[..., 20]
+        exists_box = true[..., 20] # either 1 or 0
         exists_box_unsqueezed = exists_box.unsqueeze(3).repeat(1, 1, 1, 4)
         indices_unsqueezed = indices.unsqueeze(3).repeat(1, 1, 1, 4)
         pred_box = exists_box_unsqueezed * (
-                indices_unsqueezed * pred[..., 21:25] + (1 - indices_unsqueezed) * pred[..., 26:30]
+                indices_unsqueezed * pred[..., 26:30] + (1 - indices_unsqueezed) * pred[..., 21:25]
         )
         true_box = exists_box_unsqueezed * true[..., 21:25]
 
         true_box[..., 2:4] = true_box[..., 2:4].clone().abs().sqrt()
         pred_box[..., 2:4] = pred_box[..., 2:4].clone().sign() * (pred_box[..., 2:4].clone().abs() + self.eps).sqrt()
 
-        return self.mse(torch.flatten(true_box, end_dim=-2), torch.flatten(pred_box, end_dim=-2))
+        loss_coordinates = self.mse(torch.flatten(true_box, end_dim=-2), torch.flatten(pred_box, end_dim=-2))
+
+        pred_c = exists_box * (indices * pred[..., 25] + (1 - indices) * pred[..., 20])
+        true_c = exists_box * true[..., 20]
+
+        loss_object = self.mse(torch.flatten(pred_c, start_dim=1), torch.flatten(true_c, start_dim=1))
+
+        loss_no_object = self.mse(
+            torch.flatten((1 - exists_box) * pred[..., 20], start_dim=1),
+            torch.flatten((1 - exists_box) * true[..., 20], start_dim=1)
+        ) + self.mse(
+            torch.flatten((1 - exists_box) * pred[..., 25], start_dim=1),
+            torch.flatten((1 - exists_box) * true[..., 20], start_dim=1)
+        )
+
+        exists_box_unsqueezed = exists_box.unsqueeze(3).repeat(1, 1, 1, 20)
+        loss_class = self.mse(
+            torch.flatten(exists_box_unsqueezed * pred[..., 0:20], end_dim=-2),
+            torch.flatten(exists_box_unsqueezed * true[..., 0:20], end_dim=-2),
+        )
+
+        return self.lambda_coord * loss_coordinates + loss_object + self.lambda_noobj * loss_no_object + loss_class
