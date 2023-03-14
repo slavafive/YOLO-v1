@@ -11,7 +11,7 @@ def midpoint_to_pascal_voc(tensor):
         tensor[..., 1:2] - tensor[..., 3:4] / 2,
         tensor[..., 0:1] + tensor[..., 2:3] / 2,
         tensor[..., 1:2] + tensor[..., 3:4] / 2
-    ], dim=1)
+    ], dim=-1)
 
 
 def iou(pred, true, format: str = 'pascal_voc'):
