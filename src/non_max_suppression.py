@@ -19,7 +19,7 @@ def non_max_suppresion_for_one_class(boxes: list, prob_threshold: float, iou_thr
 
 def non_max_suppression(pred: list, prob_threshold: float, iou_threshold: float, format: str = 'pascal_voc'):
     """
-    TODO: implement format feature
+    pred: [class_num, score, x1, y1, x2, y2]
     """
     boxes_dict = defaultdict(lambda: [])
     for box in pred:

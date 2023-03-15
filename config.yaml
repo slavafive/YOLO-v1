@@ -1,0 +1,27 @@
+data:
+  directory: 'yolo/data'
+  images: 'images'
+  labels: 'labels'
+  train: '8examples.csv'
+  val: '100examples.csv'
+image:
+  width: 448
+  height: 448
+  in_channels: 3
+  format: 'pascal_voc'
+
+S: 7
+C: 20
+B: 2
+lambda_coord: 5
+lambda_noobj: 0.5
+
+epochs: 5
+checkpoint_frequency: 5
+steps_train: 10
+steps_val: 10
+batch_size: 16
+learning_rate: 0.00001
+eps: 0.000001
+
+model_directory: 'yolo/artifacts'

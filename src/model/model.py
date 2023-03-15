@@ -6,11 +6,12 @@ class CNNBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, k: int, s: int, p: int):
         super(CNNBlock, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=k, stride=s, padding=p)
+        self.batch_norm = nn.BatchNorm2d(out_channels)
         self.relu = nn.LeakyReLU()
 
     def forward(self, x):
+        # return self.conv(self.batch_norm(self.relu(x)))
         return self.conv(self.relu(x))
-
 
 class YOLO(nn.Module):
 
@@ -60,8 +61,10 @@ class YOLO(nn.Module):
         S, B, C = grid_size, num_boxes, num_classes
         fc_layers = [
             nn.Flatten(),
-            nn.Linear(in_features=1024 * S * S, out_features=4096),
+            # nn.Linear(in_features=1024 * S * S, out_features=4096),
+            nn.Linear(in_features=1024 * S * S, out_features=496),
             nn.LeakyReLU(0.1),
-            nn.Linear(in_features=4096, out_features=S * S * (C + 5 * B))
+            # nn.Linear(in_features=4096, out_features=S * S * (C + 5 * B))
+            nn.Linear(in_features=496, out_features=S * S * (C + 5 * B))
         ]
         self.fc_layers = nn.Sequential(*fc_layers)

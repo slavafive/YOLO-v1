@@ -28,7 +28,8 @@ class VOCDataset(Dataset):
         boxes = torch.tensor(df_labels.values)
         image = Image.open(image_path)
         if self.transform is not None:
-            image, boxes = self.transform(image, boxes)
+            # image, boxes = self.transform(image, boxes)
+            image = self.transform(image)
         else:
             image = torch.tensor(np.array(image)).permute(2, 0, 1)
         labels = torch.zeros(self.S, self.S, self.C + 5)
