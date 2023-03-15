@@ -90,11 +90,15 @@ class Training:
         print(f"Epoch {epoch} / {self.epochs}. Validation. Loss: {epoch_loss:.3f}. mAP: {epoch_map:.3f}")
 
     def _save_checkpoint(self, epoch: int):
+        if not os.path.exists(self.model_dir):
+            os.makedirs(self.model_dir)
         model_path = f'checkpoint_{str(epoch).zfill(3)}.pt'
         model_path = os.path.join(self.model_dir, model_path)
         torch.save(self.model, model_path)
 
     def save_model(self):
+        if not os.path.exists(self.model_dir):
+            os.makedirs(self.model_dir)
         model_path = os.path.join(self.model_dir, 'model.pt')
         torch.save(self.model, model_path)
 
